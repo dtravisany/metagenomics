@@ -1,0 +1,35 @@
+# === Datos pesados: NO versionar ===
+# Symlink a los datos en el servidor TrueNAS (FASTQ, ~6.4 GB)
+metagenomics/
+metagenomics
+
+# Reads y archivos de secuenciación
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+*.sra
+*.bam
+*.bam.bai
+*.sam
+
+# Salidas de ensamblado / binning / clasificación
+*_megahit/
+*_spades/
+*_bins/
+*_checkm/
+*_gtdbtk/
+*_quast/
+*.kraken
+*.kreport
+*.bracken
+final.contigs.fa
+
+# Reportes y temporales
+*.log
+.tmp/
+*_fastqc.zip
+
+# Config de la sesión / editores
+.claude/
+.DS_Store
