@@ -15,7 +15,7 @@ Se realizarán las siguientes tareas:
 
 - Control de Calidad de los reads con [__FastQC__](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/).
 - Filtrado y recorte de reads paired-end con [__fastp__](https://github.com/OpenGene/fastp).
-- (Opcional, muestras de hospedero humano) Remoción de reads del hospedero con [__Bowtie2__](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml) + [__SAMtools__](https://www.htslib.org/).
+- (Opcional, muestras de hospedero humano) Remoción de reads del hospedero con [__Bowtie2__](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml) / [__Hostile__](https://github.com/bede/hostile) usando la referencia humana completa __T2T-CHM13__.
 - Perfil taxonómico basado en reads con [__Kraken2__](https://github.com/DerrickWood/kraken2) y re-estimación de abundancias con [__Bracken__](https://github.com/jenniferlu717/Bracken).
 - Visualización interactiva de la composición con [__Krona__](https://github.com/marbl/Krona/wiki).
 - Ensamblado _de novo_ del metagenoma con [__MEGAHIT__](https://github.com/voutcn/megahit).
@@ -101,7 +101,7 @@ de genomas. Ya están descargadas en el servidor (¡ocupan mucho espacio y demor
 | Base de datos | Uso | Ubicación en el servidor |
 | ---- | ---- | ---- |
 | Kraken2 DB (Standard/PlusPF) | Clasificación taxonómica de reads | `/mnt/biostore/dipBG/kraken2_db/` |
-| Genoma humano GRCh38 (índice Bowtie2) | Remoción de hospedero (muestras humanas) | `/mnt/biostore/dipBG/HumanGenome/` |
+| Genoma humano **T2T-CHM13** (`chm13v2.0`, con chrY; índice Bowtie2) | Remoción de hospedero (muestras humanas) | `/mnt/biostore/dipBG/HostRef/` |
 | GTDB (release para GTDB-Tk) | Taxonomía de MAGs (opcional) | `/mnt/biostore/dipBG/gtdbtk_db/` |
 
 > Nota para el/la docente: ajuste estas rutas a las de su servidor. Si no dispone de la Kraken2 DB Standard
@@ -118,7 +118,7 @@ conda activate metagenomica
 
 - Control de calidad: [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/).
 - Filtrado/recorte: [fastp](https://github.com/OpenGene/fastp).
-- Remoción de hospedero: [Bowtie2](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml) + [SAMtools](https://www.htslib.org/).
+- Remoción de hospedero: [Bowtie2](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml) o [Hostile](https://github.com/bede/hostile) (envoltorio que usa Bowtie2/minimap2 con referencia curada) + [SAMtools](https://www.htslib.org/).
 - Perfil taxonómico: [Kraken2](https://github.com/DerrickWood/kraken2) + [Bracken](https://github.com/jenniferlu717/Bracken) + [Krona](https://github.com/marbl/Krona/wiki).
 - Ensamblado: [MEGAHIT](https://github.com/voutcn/megahit) (alternativa: [metaSPAdes](https://github.com/ablab/spades)).
 - Evaluación del ensamblado: [metaQUAST](https://quast.sourceforge.net/metaquast) + [seqkit](https://bioinf.shenwei.me/seqkit/).
@@ -209,18 +209,35 @@ Las muestras de **intestino, oral y piel** (grupos 1, 2 y 3) contienen ADN human
 microbiano limpio conviene eliminar esos reads mapeándolos contra el genoma humano y **quedándonos con los que
 NO mapean**. Los grupos de ambientes (marino, suelo, etc.) pueden **saltarse este paso**.
 
-# Importante: el índice de Bowtie2 del genoma humano ya está construido en el servidor (demora mucho). Esta sección es para que sepan cómo se hace.
+### ¿Qué referencia humana usar? T2T-CHM13, no GRCh38
+
+Aunque en el práctico de RNA-Seq usamos GRCh38 (porque ahí importa la **anotación de genes** para contar), para
+**descontaminar** conviene la referencia **más completa posible**. La razón es simple: _todo read humano que no
+esté en la referencia no alinea y se "cuela" como falso read microbiano_. GRCh38 todavía tiene gaps en
+centrómeros, ADN satélite y duplicaciones segmentales; el [__T2T-CHM13__](https://www.science.org/doi/10.1126/science.abj6987)
+(consorcio Telomere-to-Telomere) es el primer genoma humano **completo, sin gaps**, y por eso remueve más ADN
+humano y deja un set microbiano más limpio.
+
+> :warning: **Cromosoma Y:** la línea CHM13 original es 46,XX y **no incluye chrY**. Como las muestras humanas
+> pueden provenir de hombres, use la versión que **incorpora el chrY de HG002** (`chm13v2.0`), o agregue ese
+> chrY a la referencia; de lo contrario, los reads del cromosoma Y se escaparían sin removerse.
+
+En el servidor la referencia `chm13v2.0` y su índice de Bowtie2 ya están construidos.
+
+# Importante: el índice de Bowtie2 de T2T-CHM13 ya está construido en el servidor (demora mucho). Esta sección es para que sepan cómo se hace.
 
 Construcción del índice (NO ejecutar, solo referencia):
 
 ```bash
-bowtie2-build /mnt/biostore/dipBG/HumanGenome/GCF_000001405.40_GRCh38.p14_genomic.fna /mnt/biostore/dipBG/HumanGenome/GRCh38
+bowtie2-build /mnt/biostore/dipBG/HostRef/chm13v2.0.fa /mnt/biostore/dipBG/HostRef/chm13v2
 ```
+
+### Opción A — Bowtie2 (didáctica: se ve el concepto)
 
 Remoción del hospedero (los grupos 1-3 sí ejecutan esto):
 
 ```bash
-bowtie2 -x /mnt/biostore/dipBG/HumanGenome/GRCh38 \
+bowtie2 -x /mnt/biostore/dipBG/HostRef/chm13v2 \
         -1 <ACCESION>_1.clean.fastq.gz -2 <ACCESION>_2.clean.fastq.gz \
         --un-conc-gz <ACCESION>_nohost.fastq.gz \
         -p 8 -S /dev/null
@@ -231,13 +248,37 @@ bowtie2 -x /mnt/biostore/dipBG/HumanGenome/GRCh38 \
 
 | Parámetro | Descripción |
 | ---- | ---- |
-| `-x` | prefijo del índice del genoma del hospedero |
+| `-x` | prefijo del índice del genoma del hospedero (T2T-CHM13) |
 | `-1` / `-2` | reads limpios `R1` / `R2` |
 | `--un-conc-gz` | escribe los pares que NO alinearon (lo que queremos conservar) |
 | `-S /dev/null` | descartamos el SAM de los reads que sí alinearon (no nos interesan) |
 
-> De aquí en adelante, si su grupo hizo remoción de hospedero use los archivos `*_nohost.1/2.fastq.gz`;
-> si no, use los `*_1.clean.fastq.gz` / `*_2.clean.fastq.gz`.
+### Opción B — Hostile (recomendada)
+
+[Hostile](https://github.com/bede/hostile) es una herramienta dedicada a la descontaminación de hospedero. Por
+debajo usa **Bowtie2** (reads cortos) o **minimap2** (largos), pero con una **referencia humana ya curada y
+enmascarada** en las regiones homólogas a microbios —para no borrar por error reads microbianos reales— y que
+ya incluye el chrY. Resuelve en una sola línea lo que en la Opción A hacemos a mano:
+
+```bash
+hostile clean \
+        --fastq1 <ACCESION>_1.clean.fastq.gz \
+        --fastq2 <ACCESION>_2.clean.fastq.gz \
+        --index human-t2t-hla \
+        --threads 8 \
+        --out-dir <ACCESION>_nohost
+```
+
+La primera vez descarga el índice `human-t2t-hla` (basado en T2T-CHM13). Entrega los FASTQ limpios y un
+reporte con cuántos reads se removieron.
+
+> **Completitud vs. especificidad:** T2T-CHM13 aporta *completitud* (atrapa más ADN humano); el *enmascarado*
+> de Hostile aporta *especificidad* (no elimina microbios que se parecen a humano). Son dos mejoras
+> complementarias, y por eso Hostile combina ambas.
+
+> De aquí en adelante, si su grupo hizo remoción de hospedero use los archivos limpios (`*_nohost.1/2.fastq.gz`
+> de Bowtie2, o los de la carpeta de salida de Hostile); si no, use los `*_1.clean.fastq.gz` /
+> `*_2.clean.fastq.gz`.
 
 ## 4. Perfil taxonómico basado en reads (Kraken2 + Bracken)
 
