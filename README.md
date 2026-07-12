@@ -109,11 +109,6 @@ de genomas. Ya están descargadas en el servidor (¡ocupan mucho espacio y demor
 ### Software:
 
 Todo el software está disponible vía [conda](https://docs.conda.io/) / [bioconda](https://bioconda.github.io/).
-Recomendamos activar el ambiente del curso:
-
-```bash
-conda activate metagenomica
-```
 
 - Control de calidad: [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/).
 - Filtrado/recorte: [fastp](https://github.com/OpenGene/fastp).
@@ -123,6 +118,39 @@ conda activate metagenomica
 - Evaluación del ensamblado: [metaQUAST](https://quast.sourceforge.net/metaquast) + [seqkit](https://bioinf.shenwei.me/seqkit/).
 - Predicción de genes: [Prodigal](https://github.com/hyattpd/Prodigal).
 - Binning y MAGs: [MetaBAT2](https://bitbucket.org/berkeleylab/metabat/src/master/) + [CheckM](https://github.com/Ecogenomics/CheckM) + [GTDB-Tk](https://github.com/Ecogenomics/GTDBTk) (opcional).
+
+### Activar el ambiente
+
+El ambiente del curso ya está creado en el servidor con **todo el software** de la lista anterior. Actívelo al
+inicio de cada sesión (y déjelo activo durante todo el práctico):
+
+```bash
+conda activate metagenomica
+```
+
+Sabrá que está activo porque el prompt cambia a `(metagenomica) usuario@servidor:$`. Puede comprobar que las
+herramientas responden, por ejemplo:
+
+```bash
+fastqc --version
+kraken2 --version
+```
+
+> **GTDB-Tk (paso 8, opcional)** vive en un **ambiente aparte** llamado `gtdbtk` (sus dependencias son pesadas y
+> se aíslan para no interferir con el resto). Solo al momento de correr GTDB-Tk cambie de ambiente:
+>
+> ```bash
+> conda deactivate          # sale de metagenomica
+> conda activate gtdbtk     # entra al ambiente de GTDB-Tk
+> ```
+>
+> Al terminar ese paso, vuelva con `conda deactivate && conda activate metagenomica`.
+
+Para salir del ambiente al final de la sesión:
+
+```bash
+conda deactivate
+```
 
 
 # Inicio del Práctico
