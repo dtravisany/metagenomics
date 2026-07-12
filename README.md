@@ -238,12 +238,14 @@ Remoción del hospedero (los grupos 1-3 sí ejecutan esto):
 ```bash
 bowtie2 -x /mnt/biostore/dipBG/HostRef/chm13v2 \
         -1 <ACCESION>_1.clean.fastq.gz -2 <ACCESION>_2.clean.fastq.gz \
-        --un-conc-gz <ACCESION>_nohost.fastq.gz \
+        --un-conc-gz <ACCESION>_nohost.%.fastq.gz \
         -p 8 -S /dev/null
 ```
 
 `--un-conc-gz` guarda los pares que **no** alinearon al humano en `<ACCESION>_nohost.1.fastq.gz` y
-`<ACCESION>_nohost.2.fastq.gz`; esos son los reads microbianos que usaremos de aquí en adelante.
+`<ACCESION>_nohost.2.fastq.gz`; esos son los reads microbianos que usaremos de aquí en adelante. (El
+`%` en el nombre es reemplazado por bowtie2 con `1` y `2`; si se omite, los archivos salen como
+`<ACCESION>_nohost.fastq.1.gz`, que no calza con los pasos siguientes.)
 
 | Parámetro | Descripción |
 | ---- | ---- |
