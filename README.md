@@ -23,7 +23,6 @@ Se realizarán las siguientes tareas:
 - Predicción de genes con [__Prodigal__](https://github.com/hyattpd/Prodigal) (modo `meta`).
 - Reconstrucción de genomas (_binning_) con [__MetaBAT2__](https://bitbucket.org/berkeleylab/metabat/src/master/) y evaluación de la calidad de los MAGs con [__CheckM__](https://github.com/Ecogenomics/CheckM).
 - (Opcional) Asignación taxonómica de los MAGs con [__GTDB-Tk__](https://github.com/Ecogenomics/GTDBTk).
-- Comparación de diversidad y composición **entre los distintos ambientes** de todos los grupos.
 
 
 ## Materiales:
@@ -33,8 +32,8 @@ de NCBI y su espejo europeo, el [European Nucleotide Archive (ENA)](https://www.
 Un buen catálogo de estudios y muestras curadas es [MGnify](https://www.ebi.ac.uk/metagenomics/) de EBI.
 
 En este práctico cada grupo analizará **una muestra metagenómica de un ambiente distinto**. Todas son
-Illumina, paired-end (`R1` + `R2`) y de tipo shotgun (WGS / `METAGENOMIC`). La idea es que, al final,
-comparemos los resultados entre ecosistemas.
+Illumina, paired-end (`R1` + `R2`) y de tipo shotgun (WGS / `METAGENOMIC`). Cada grupo trabajará de forma
+independiente con su propia muestra.
 
 Ustedes utilizarán los siguientes datos:
 
@@ -291,6 +290,10 @@ Es recomendable usar `screen` porque Kraken2 carga la base de datos completa en 
 screen -S kraken
 ```
 
+> :information_source: **Grupos 1-3 (muestras humanas):** de aquí en adelante reemplacen `<ACCESION>_1.clean.fastq.gz` /
+> `<ACCESION>_2.clean.fastq.gz` por sus archivos sin hospedero (`*_nohost.1/2.fastq.gz` de Bowtie2, o los de la
+> carpeta de salida de Hostile). Los demás grupos siguen usando los `*.clean.fastq.gz`.
+
 ```bash
 kraken2 --db /mnt/biostore/dipBG/kraken2_db \
         --paired <ACCESION>_1.clean.fastq.gz <ACCESION>_2.clean.fastq.gz \
@@ -374,7 +377,7 @@ Reporte más completo (N50, largo total, contig más largo, etc.):
 metaquast.py <ACCESION>_megahit/final.contigs.fa -o <ACCESION>_quast --max-ref-number 0 -t 8
 ```
 
-### En su informe deberá reportar, para su ensamblado: número de contigs, largo total (bp), N50 y el contig más largo. Compare estos valores con los de otros grupos: ¿qué ambientes ensamblan mejor y por qué? (pista: complejidad/diversidad de la comunidad y profundidad de secuenciación).
+### En su informe deberá reportar, para su ensamblado: número de contigs, largo total (bp), N50 y el contig más largo. Discuta qué tan bien ensambló su muestra y por qué (pista: complejidad/diversidad de la comunidad y profundidad de secuenciación).
 
 ## 7. Predicción de genes (Prodigal)
 
@@ -451,39 +454,6 @@ gtdbtk classify_wf --genome_dir <ACCESION>_bins -x fa --out_dir <ACCESION>_gtdbt
 
 Esto le dará el nombre (dominio → especie) de cada genoma reconstruido según la taxonomía GTDB.
 
-## 9. Comparación entre ambientes (análisis en su computador)
-
-Ahora que trabajamos con archivos pequeños (los `.kreport` / `.bracken`), podemos hacer el análisis
-comparativo en el computador personal. Tráigase los reportes de **todos los grupos** (o compártanlos):
-
-```bash
-mkdir -p ~/METAGENOMICS/perfiles
-scp <usuario>@<servidor>:METAGENOMICS/*.bracken ~/METAGENOMICS/perfiles/
-```
-
-Una forma simple y visual de comparar es [Pavian](https://fbreitwieser.shinyapps.io/pavian/) (webserver donde
-se suben los `.kreport`). Para un análisis reproducible en R, se pueden combinar los `.bracken` de todos los
-ambientes en una tabla de abundancias (taxón × muestra) y calcular:
-
-- **Diversidad alfa** (riqueza / índice de Shannon) por muestra.
-- **Diversidad beta** (distancia Bray-Curtis) y un ordenamiento **PCoA/NMDS** para ver cómo se separan los
-  ambientes.
-
-```R
-# Ejemplo mínimo (requiere el paquete vegan)
-install.packages("vegan")
-library(vegan)
-
-# abund = matriz muestras (filas) x taxones (columnas), construida a partir de los .bracken
-shannon <- diversity(abund, index = "shannon")   # diversidad alfa
-bray    <- vegdist(abund, method = "bray")        # diversidad beta
-orden   <- cmdscale(bray)                          # PCoA
-plot(orden, main = "PCoA Bray-Curtis entre ambientes")
-text(orden, labels = rownames(abund))
-```
-
-### En su informe deberá presentar: (a) un gráfico de diversidad alfa comparando los ambientes, y (b) un ordenamiento (PCoA/NMDS) mostrando si las muestras se agrupan por tipo de ecosistema. Discuta si los ambientes más "extremos" (fuente termal, marino) se separan de los asociados a humano (intestino, oral, piel).
-
 ---
 
 # Resumen del flujo
@@ -500,8 +470,6 @@ fastp  ──►  (Bowtie2: remoción de hospedero, solo muestras humanas)
              │  metaQUAST / seqkit (calidad del ensamblado)
              ├──► Prodigal  ──►  ¿QUÉ pueden hacer?  (genes)
              └──► MetaBAT2 + CheckM (+ GTDB-Tk)  ──►  MAGs (genomas reconstruidos)
-
-comparación final entre ambientes (diversidad alfa/beta)
 ```
 
 # Entrega del informe
@@ -513,5 +481,4 @@ Su informe debe incluir, para su ambiente asignado:
 3. **Ensamblado**: tabla con nº de contigs, largo total, N50 y contig más largo.
 4. **Genes**: número de genes predichos por Prodigal.
 5. **MAGs**: número de genomas recuperados y su completitud/contaminación (CheckM); taxonomía si usó GTDB-Tk.
-6. **Comparación entre ambientes**: diversidad alfa y beta respecto a los demás grupos.
-7. **Discusión**: ¿los resultados tienen sentido biológico para su ecosistema? Contraste con literatura.
+6. **Discusión**: ¿los resultados tienen sentido biológico para su ecosistema? Contraste con literatura.
