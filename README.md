@@ -365,6 +365,12 @@ bracken -d /mnt/biostore/dipBG/kraken2_db \
 ktImportTaxonomy -q 2 -t 3 <ACCESION>.kraken -o <ACCESION>.krona.html
 ```
 
+Lo traemos a nuestro computador:
+
+```bash
+scp -r <usuario>@<servidor>:metagenomics/<reads>/<accession>.krona.html* .
+```
+
 Ábralo en su navegador: es un gráfico circular interactivo de la composición taxonómica.
 
 ### En su informe deberá mostrar el gráfico de Krona y describir los phyla/géneros dominantes de su ambiente, e indicar si tienen sentido biológico (por ejemplo, cianobacterias en muestras marinas, o _Bacteroides_/_Firmicutes_ en intestino).
