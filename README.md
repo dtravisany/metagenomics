@@ -337,7 +337,7 @@ kraken2 --db /mnt/biostore/dipBG/kraken2_db \
 | `--db` | ruta a la base de datos de Kraken2 |
 | `--paired` | indica que la entrada son dos archivos paired-end |
 | `--report` | archivo resumen con el % de reads por taxón (el que más usaremos) |
-| `--output` | asignación read-por-read (archivo grande, se puede omitir con `--output -`) |
+| `--output` | asignación read-por-read (archivo grande). **Manténgalo** (`<ACCESION>.kraken`): Krona lo necesita más abajo. No use `--output -` si va a generar el gráfico de Krona. |
 
 Kraken2 tiende a **sobre-estimar** la cantidad de especies. **Bracken** re-estima las abundancias reales a un
 nivel taxonómico dado (ej. especie `S` o género `G`):
