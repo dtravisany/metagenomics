@@ -84,14 +84,6 @@ Los reads de cada grupo están alojados en el servidor, en la carpeta de su ambi
 
 Convención de nombres: `<ACCESION>_1.fastq.gz` es el read forward (`R1`) y `<ACCESION>_2.fastq.gz` el reverse (`R2`).
 
-Cada grupo trabajará en su carpeta de home creando una carpeta de trabajo, por ejemplo:
-
-```bash
-mkdir -p ~/METAGENOMICS/reads
-cp /mnt/biostore/dipBG/metagenomics/<SU_CARPETA>/*.fastq.gz ~/METAGENOMICS/reads/
-cd ~/METAGENOMICS/reads
-```
-
 ### Bases de datos de referencia:
 
 A diferencia de RNA-Seq, en metagenómica no usamos un genoma único, sino **bases de datos** que agrupan miles
