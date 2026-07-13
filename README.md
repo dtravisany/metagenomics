@@ -357,6 +357,10 @@ bracken -d /mnt/biostore/dipBG/kraken2_db \
 
 ### Visualización con Krona
 
+> :warning: **Requiere el archivo `<ACCESION>.kraken`** (la salida read-por-read del paso de Kraken2). Por eso
+> `--output <ACCESION>.kraken` es **obligatorio** si va a hacer Krona: **no** lo omita ni use `--output -`, o
+> este comando fallará por archivo inexistente.
+
 ```bash
 ktImportTaxonomy -q 2 -t 3 <ACCESION>.kraken -o <ACCESION>.krona.html
 ```
