@@ -103,9 +103,6 @@ de genomas. Ya están descargadas en el servidor (¡ocupan mucho espacio y demor
 | Genoma humano **T2T-CHM13** (`chm13v2.0`, con chrY; índice Bowtie2) | Remoción de hospedero (muestras humanas) | `/mnt/biostore/dipBG/HostRef/` |
 | GTDB (release para GTDB-Tk) | Taxonomía de MAGs (opcional) | `/mnt/biostore/dipBG/gtdbtk_db/` |
 
-> Nota para el/la docente: ajuste estas rutas a las de su servidor. Si no dispone de la Kraken2 DB Standard
-> (~50-100 GB), puede usar la [MiniKraken / k2_standard_08gb](https://benlangmead.github.io/aws-indexes/k2).
-
 ### Software:
 
 Todo el software está disponible vía [conda](https://docs.conda.io/) / [bioconda](https://bioconda.github.io/).
