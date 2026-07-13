@@ -167,10 +167,10 @@ fastqc --threads 6 *.fastq.gz
 Nos traemos los resultados a nuestro computador para evaluarlos:
 
 ```bash
-scp <usuario>@<servidor>:METAGENOMICS/reads/*_fastqc.html .
+scp <usuario>@<servidor>:metagenomics/<reads>/*_fastqc.html .
 ```
 
-> Reemplace `<usuario>` por su usuario/grupo y `<servidor>` por la IP o nombre del servidor del curso.
+> Reemplace `<usuario>` por su usuario/grupo, `<servidor>` por la IP o nombre del servidor del curso y `<reads>` por el nombre de la carpeta que tiene sus reads 
 
 Revise, para cada muestra: el gráfico **Per base sequence quality** (dónde cae la calidad), el
 **Adapter Content** y el **Per base sequence content**. En metagenómica **no** esperamos duplicados bajos ni
